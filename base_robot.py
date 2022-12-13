@@ -25,10 +25,13 @@ class BaseRobot():
         self._tireCircum = self._tireDiameter * math.pi  # CM
 
         # Reset the yaw angle when the baseRobot is declared
-        self.hub.motion_sensor.reset_yaw_angle()
+        MotionSensor().reset_yaw_angle()
     
     def AbortCheck(self):
         if(self.hub.right_button.is_pressed()):
+            MotionSensor().reset_yaw_angle()
+            driveMotors.stop()
+            
             return()
 
     def GyroDrive(self, distance, maxspeed=50, heading=PrimeHub().motion_sensor.get_yaw_angle()):
@@ -47,6 +50,16 @@ class BaseRobot():
         #Cruises at maximum speed
 
 
-    def GyroTurn(self, angle):
-        turnspeed = 10
-        
+    def GyroTurn(self, angle, speed=10):
+        self.AbortCheck()
+        MotionSensor().reset_yaw_angle()
+        #Finds direction
+        if (angle>0):
+            while(MotionSensor.get_yaw_angle()<angle):
+                self.AbortCheck()
+                self.driveMotors.start_tank(speed,-speed)
+        else:
+            while(MotionSensor.get_yaw_angle()<angle):
+                self.AbortCheck()
+                self.driveMotors.start_tank(-speed,speed)
+        self.driveMotors.stop()
